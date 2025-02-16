@@ -9,11 +9,12 @@ typedef struct {
     unsigned int (*hashf)(void*);
     // used for comparison between keys, aka are they the same keys?
     int (*compare)(void*, void*);
-    // used to free data storage.    
+    // used to free data pointed by the void* in entries.
     void (*free)(Entry);
     unsigned int length;
     unsigned int occupied;
 } HashMap;
+
 HashMap* createMap(int length, unsigned int (*hash)(void*), int(*compare)(void*,void*),void (*free)(Entry)){
     HashMap* ret = malloc(sizeof(HashMap));
     Entry* entries = malloc(sizeof(Entry) * length);
@@ -30,7 +31,27 @@ HashMap* createMap(int length, unsigned int (*hash)(void*), int(*compare)(void*,
     return ret;
 }
 void rehash(HashMap* map){
-    
+	// cannot do in-place, since it will probably collide with things that may move after
+	Entry* newE = malloc(sizeof(Entry)* map->length);
+	for (unsigned int i = 0; i < map->length; i++){
+        	newE[i].key = NULL;
+   	}
+	for (unsigned int i = 0; i < map->length; i++){
+		if (map->entries[i].key != NULL){
+           		j = map->hashf(map->entries[i].key) % newL;
+            		while (newE[j].key != NULL){
+                		if (j == map->length){
+                    			j=0;
+                		}
+                		j++;
+            		}
+            //printf("key at %d  moved to %d\n",i,j);
+            newE[j].key = map->entries[i].key;
+            newE[j].value = map->entries[i].value;
+       		 }
+    	}
+	free(map->entries);
+	map->entries = newE;
 }
 void growMap(HashMap* map, unsigned int inc){
     unsigned int newL = map->length+inc;
@@ -58,9 +79,6 @@ void growMap(HashMap* map, unsigned int inc){
     map->entries = newE;
     map->length = newL;
 }
-/*assumes heap allocation of contents.
-*data WILL most likely CORRUPT if it is allocated on the stack, and used after the scope it was introduced in ends.
-*/
 void addPair(HashMap* map, void* key, void* val){
     // if (map->occupied > 3 / 4 * map->length)
     if (4 * map->occupied > 3 * map->length-1){
@@ -79,7 +97,6 @@ void addPair(HashMap* map, void* key, void* val){
     map->entries[index].value = val;
     map->occupied++;
 }
-// returns 0 if it fails, returns 1 if it doesn't.
 int removeKey(HashMap* map, void* key){
     int index = map->hashf(key) % map->length;
     int start = index;
@@ -90,16 +107,14 @@ int removeKey(HashMap* map, void* key){
         }
         if (index == start){
             //printf("Invalid or nonexistant key");
-            return 0;
+            return 1;
         }
     }
     map->occupied--;
     map->free(map->entries[index]);
     map->entries[index].key = NULL;
-    return 1;
+    return 0;
 }
-/*returns the value associated with the key (as a void*).
-*if there is no such key, returns (void*) NULL*/
 void* getValue(HashMap* map, void* key){
     int index = map->hashf(key) % map->length;
     int start = index;
@@ -115,10 +130,12 @@ void* getValue(HashMap* map, void* key){
     return map->entries[index].value;
 }
 void clearMap(HashMap* map){
-    free(map->entries);
-    free(map);
+    for (unsigned int i = 0; i < map->length; i++){
+        if (map->entries[i].key != NULL){
+            map->free(map->entries[i]);
+        }
+    }
 }
-/*frees all memory in the map, including all assigned key value pairs.*/
 void discardMap(HashMap* map){
     for (unsigned int i = 0; i < map->length; i++){
         if (map->entries[i].key != NULL){
