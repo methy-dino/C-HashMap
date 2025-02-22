@@ -1,16 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "defaults.h"
 typedef struct {
     void* key;
     void* value;
 } Entry;
 typedef struct {
     Entry* entries;
+		// used to hash the value of your entry.
     unsigned int (*hashf)(void*);
     // used for comparison between keys, aka are they the same keys?
     int (*compare)(void*, void*);
     // used to free data pointed by the void* in entries.
-    void (*free)(Entry);
+    void (*free)(Entry*);
     unsigned int length;
     unsigned int occupied;
 } HashMap;
@@ -111,7 +113,7 @@ int removeKey(HashMap* map, void* key){
         }
     }
     map->occupied--;
-    map->free(map->entries[index]);
+    map->free(&map->entries[index]);
     map->entries[index].key = NULL;
     return 0;
 }
@@ -124,6 +126,7 @@ void* getValue(HashMap* map, void* key){
             index = 0;
         }
         if (index == start){
+						mapErr = MAP_NOSUCH;
             return (void*)NULL;
         }
     }
@@ -132,14 +135,14 @@ void* getValue(HashMap* map, void* key){
 void clearMap(HashMap* map){
     for (unsigned int i = 0; i < map->length; i++){
         if (map->entries[i].key != NULL){
-            map->free(map->entries[i]);
+            map->free(&map->entries[i]);
         }
     }
 }
 void discardMap(HashMap* map){
     for (unsigned int i = 0; i < map->length; i++){
         if (map->entries[i].key != NULL){
-            map->free(map->entries[i]);
+            map->free(&map->entries[i]);
         }
     }
     free(map->entries);
