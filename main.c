@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "hashMap.h"
+#include "tests.h"
 // file with an example of how to use the library.
-unsigned int strHash(void* key){
+unsigned int strHash2(void* key){
     unsigned int code = 0;
     unsigned int i = 0;
     while (((char*)key)[i] != '\0'){
@@ -16,22 +17,23 @@ int isSame(void* a, void* b){
     return strcmp((char*)a, (char*)b);
 }
 
-void freeStr(Entry entry){
+void freeStr(Entry* entry){
 	//use a function like this to clear your custom inserted data structure
 	// since it can contain other pointers inside it.
-	free(entry.key);
-	free(entry.value);
+	free(entry->key);
+	free(entry->value);
 }
 int main(int argc, char *argv[]){
     HashMap* a = createMap(2, &strHash, &isSame, &freeStr);
-    
+    // THIS IS A WRONG WAY TO ADD PAIRS, SINCE YOU SHOULD ALLOC THEN ON THE HEAP
     addPair(a,(void*)"a",(void*)"b");
     addPair(a,(void*)"c",(void*)"b");
     addPair(a,(void*)"d",(void*)"eeeee");
    // removeKey(a,"a");
     printf("%s\n",  (char*)getValue(a,"d"));
+    //test for no collisions
     for (int i = 0; i <  200; i++){
-        HashMap* map = createMap(6, &strHash, &isSame, &freeStr);
+        HashMap* map = createMap(6, &strHash2, &isSame, &freeStr);
 
         char* str1 =(char*) malloc(2);
         str1[0] = 'a';
@@ -53,5 +55,6 @@ int main(int argc, char *argv[]){
         char ss[] = "a";
         printf("%s",  (char*)getValue(map, ss));
     }
+    unitTests();
     return 0;
 }

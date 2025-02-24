@@ -1,5 +1,8 @@
+#pragma once
+#define MAP_NOSUCH 1
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 typedef struct {
     void* key;
     void* value;
@@ -10,13 +13,13 @@ typedef struct {
     // used for comparison between keys, if they are equal, it should return 0, if different, it should be != 0;
     int (*compare)(void*, void*);
     // used to free data storage.    
-    void (*free)(Entry);
+    void (*free)(Entry*);
     unsigned int length;
     unsigned int occupied;
 } HashMap;
 /* returns a HashMap* equipped with the specified capacity and functions. 
 *  one should not use multiple types inside one HashMap, since it is very unsafe.*/
-HashMap* createMap(int length, unsigned int (*hash)(void*), int(*compare)(void*,void*), void (*free)(Entry));
+HashMap* createMap(int length, unsigned int (*hash)(void*), int(*compare)(void*,void*), void (*free)(Entry*));
 /* rehashes the attached HashMap, will improve performance after many deletions, it is not automatically called */
 void rehash(HashMap* map);
 /*grows map by the provided int, automatic grows are set to when a HashMap is more than 3/4 full*/
@@ -37,3 +40,8 @@ void* getValue(HashMap* map, void* key);
 void clearMap(HashMap* map);
 /*frees all memory in the map, including all assigned key value pairs.*/
 void discardMap(HashMap* map);
+// very shitty default hash function that should return on anything.
+unsigned int defHash(void* key);
+// function to hash null terminated strings.
+unsigned int strHash(void* key);
+void defaultFree(Entry* entry);

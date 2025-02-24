@@ -1,23 +1,23 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "defaults.h"
+#include <limits.h>
+int mapErr = 0;
+#define MAP_NOSUCH 1
 typedef struct {
     void* key;
     void* value;
 } Entry;
 typedef struct {
     Entry* entries;
-		// used to hash the value of your entry.
     unsigned int (*hashf)(void*);
-    // used for comparison between keys, aka are they the same keys?
+    // used for comparison between keys, if they are equal, it should return 0, if different, it should be != 0;
     int (*compare)(void*, void*);
-    // used to free data pointed by the void* in entries.
+    // used to free data storage.    
     void (*free)(Entry*);
     unsigned int length;
     unsigned int occupied;
 } HashMap;
-
-HashMap* createMap(int length, unsigned int (*hash)(void*), int(*compare)(void*,void*),void (*free)(Entry)){
+HashMap* createMap(int length, unsigned int (*hash)(void*), int(*compare)(void*,void*),void (*free)(Entry*)){
     HashMap* ret = malloc(sizeof(HashMap));
     Entry* entries = malloc(sizeof(Entry) * length);
     // sanitizing data, should be faster than calling calloc().
@@ -34,13 +34,14 @@ HashMap* createMap(int length, unsigned int (*hash)(void*), int(*compare)(void*,
 }
 void rehash(HashMap* map){
 	// cannot do in-place, since it will probably collide with things that may move after
+    unsigned int j = 0;
 	Entry* newE = malloc(sizeof(Entry)* map->length);
 	for (unsigned int i = 0; i < map->length; i++){
         	newE[i].key = NULL;
    	}
 	for (unsigned int i = 0; i < map->length; i++){
 		if (map->entries[i].key != NULL){
-           		j = map->hashf(map->entries[i].key) % newL;
+           		j = map->hashf(map->entries[i].key) % map->length;
             		while (newE[j].key != NULL){
                 		if (j == map->length){
                     			j=0;
@@ -99,9 +100,24 @@ void addPair(HashMap* map, void* key, void* val){
     map->entries[index].value = val;
     map->occupied++;
 }
-int removeKey(HashMap* map, void* key){
-    int index = map->hashf(key) % map->length;
-    int start = index;
+unsigned int hasKey(HashMap* map, void* key){
+    unsigned int index = map->hashf(key) % map->length;
+    unsigned int start = index;
+    while (map->compare(map->entries[index].key, key) != 0){
+        index++;
+        if (index == map->length){
+            index = 0;
+        }
+        if (index == start){
+            //printf("Invalid or nonexistant key");
+            return UINT_MAX;
+        }
+    }
+    return index;
+}
+unsigned int removeKey(HashMap* map, void* key){
+    unsigned int index = map->hashf(key) % map->length;
+    unsigned int start = index;
     while (map->compare(map->entries[index].key, key) != 0){
         index++;
         if (index == map->length){
@@ -126,7 +142,7 @@ void* getValue(HashMap* map, void* key){
             index = 0;
         }
         if (index == start){
-						mapErr = MAP_NOSUCH;
+			mapErr = MAP_NOSUCH;
             return (void*)NULL;
         }
     }
@@ -147,4 +163,26 @@ void discardMap(HashMap* map){
     }
     free(map->entries);
     free(map);
+}
+// very shitty default hash function that should return on anything.
+unsigned int defHash(void* key){
+	return (int) ((char*)key)[0];
+}
+
+// function to hash null terminated strings.
+unsigned int strHash(void* key){
+	unsigned int value;
+	unsigned int charSize = sizeof(char);
+	charSize = charSize * 8;
+    unsigned int i = 0;
+	while (((char*)key)[i] != '\0'){
+		// the bit shift by charSize is to grant compatibility with other charset, such as UTF-16. 
+		value = ((value << charSize) | ((char*)key)[i]) & 65033;
+		i++;
+	}
+	return value;
+}
+void defaultFree(Entry* entry){
+	free(entry->key);
+	free(entry->value);
 }
