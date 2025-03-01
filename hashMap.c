@@ -111,7 +111,7 @@ unsigned int hasKey(HashMap* map, void* key){
         if (index == start){
             //printf("Invalid or nonexistant key");
             return UINT_MAX;
-        }
+				}
     }
     return index;
 }
@@ -185,4 +185,24 @@ unsigned int strHash(void* key){
 void defaultFree(Entry* entry){
 	free(entry->key);
 	free(entry->value);
+}
+/*verbosity indicates what to print.
+ * 0 entry print for all entries
+ * 1 prints hashmap entry fill rate.
+ * 2 also prints hashmap address and entry adress
+ * */
+void debugPrintMap(HashMap* map, (void)(printEntry)(Entry*), int verbosity){
+	printf("-  -  -  -\n");
+	if (verbosity > 1){
+		printf("hashmap debug info for map at: %p, which has it's entries at:%p\n", (void*)map, (void*)&map->entries);
+	} else {
+		printf("hashmap debug info:\n");
+	}
+	if (verbosity > 0) {
+		printf("it has %u entries, of which %u are full\n", map->length, map->occupied);
+	}
+	printf("this is it's entry data:\n");
+	for (unsigned int i = 0; i < map->length; i++){
+		printEntry(&map->entries[i]);
+	}
 }
