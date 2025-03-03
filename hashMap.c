@@ -191,7 +191,7 @@ void defaultFree(Entry* entry){
  * 1 prints hashmap entry fill rate.
  * 2 also prints hashmap address and entry adress
  * */
-void debugPrintMap(HashMap* map, (void)(printEntry)(Entry*), int verbosity){
+void debugPrintMap(HashMap* map, void (*printEntry)(Entry*), int verbosity){
 	printf("-  -  -  -\n");
 	if (verbosity > 1){
 		printf("hashmap debug info for map at: %p, which has it's entries at:%p\n", (void*)map, (void*)&map->entries);
