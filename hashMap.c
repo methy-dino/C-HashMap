@@ -32,6 +32,7 @@ HashMap* createMap(int length, unsigned int (*hash)(void*), int(*compare)(void*,
     ret->occupied = 0;
     return ret;
 }
+/* it is a good idea to rehash a map after altering many entries, since that will most likely alter the hashcode of the object*/
 void rehash(HashMap* map){
 	// cannot do in-place, since it will probably collide with things that may move after
     unsigned int j = 0;
@@ -89,11 +90,18 @@ void addPair(HashMap* map, void* key, void* val){
         growMap(map, map->length);
     }
     int index = map->hashf(key) % map->length;
-    while (map->entries[index].key != NULL && map->entries[index].key != key){
-        index++;
+    while (map->entries[index].key != NULL){
+      	if (map->compare(map->entries[index].key, key) == 0){
+					map->entries[index].key = key;
+    			map->entries[index].value = val;
+					// this should give better order
+					rehash(map);
+					return;
+				}
+				index++;
         if (index == map->length){
             index = 0;
-        }
+        }	
     }
     //printf("added key at index %d\n", index);
     map->entries[index].key = key;
@@ -110,7 +118,7 @@ unsigned int hasKey(HashMap* map, void* key){
         }
         if (index == start){
             //printf("Invalid or nonexistant key");
-            return UINT_MAX;
+            return -1; //auto convert to uint max
 				}
     }
     return index;
@@ -131,6 +139,7 @@ unsigned int removeKey(HashMap* map, void* key){
     map->occupied--;
     map->free(&map->entries[index]);
     map->entries[index].key = NULL;
+		rehash(map);
     return 0;
 }
 void* getValue(HashMap* map, void* key){
@@ -142,7 +151,7 @@ void* getValue(HashMap* map, void* key){
             index = 0;
         }
         if (index == start){
-			mapErr = MAP_NOSUCH;
+						mapErr = MAP_NOSUCH;
             return (void*)NULL;
         }
     }
