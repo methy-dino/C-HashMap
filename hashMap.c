@@ -215,3 +215,7 @@ void debugPrintMap(HashMap* map, void (*printEntry)(Entry*), int verbosity){
 		printEntry(&map->entries[i]);
 	}
 }
+// there's not much I can do about printing, since there can be near infinite pairs, uh have this generic function.
+void addressPrint(Entry* pair){
+	printf("key at %p and val at %p", pair->key, pair->value);
+}

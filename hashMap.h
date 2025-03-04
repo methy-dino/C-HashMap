@@ -46,3 +46,4 @@ unsigned int defHash(void* key);
 unsigned int strHash(void* key);
 void defaultFree(Entry* entry);
 void debugPrintMap(HashMap* map, void (*printEntry)(Entry*), int verbosity);
+void addressPrint(Entry* pair);
