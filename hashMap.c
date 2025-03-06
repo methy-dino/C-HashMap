@@ -212,7 +212,11 @@ void debugPrintMap(HashMap* map, void (*printEntry)(Entry*), int verbosity){
 	}
 	printf("this is it's entry data:\n");
 	for (unsigned int i = 0; i < map->length; i++){
-		printEntry(&map->entries[i]);
+        if (map->entries[i].key != NULL){
+		    printEntry(&map->entries[i]);
+        } else {
+            printf("NULL ENTRY\n");        
+        }
 	}
 }
 // there's not much I can do about printing, since there can be near infinite pairs, uh have this generic function.
