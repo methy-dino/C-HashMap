@@ -1,3 +1,4 @@
+#pragma once
 #include "hashMap.h"
 #include <assert.h>
 #include <stdio.h>

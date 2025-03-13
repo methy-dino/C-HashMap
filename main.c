@@ -25,10 +25,12 @@ void freeStr(Entry* entry){
 }
 int main(int argc, char *argv[]){
     HashMap* a = createMap(2, &strHash, &isSame, &freeStr);
+		printf("aa\n");
     // THIS IS A WRONG WAY TO ADD PAIRS, SINCE YOU SHOULD ALLOC THEN ON THE HEAP
     addPair(a,(void*)"a",(void*)"b");
     addPair(a,(void*)"c",(void*)"b");
     addPair(a,(void*)"d",(void*)"eeeee");
+		printf("bb\n");
    // removeKey(a,"a");
     printf("%s\n",  (char*)getValue(a,"d"));
     //test for no collisions

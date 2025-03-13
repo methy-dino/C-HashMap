@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-void printEnt(Entry* ent){
-	printf("details of entry at %p\n", (void*) ent);
+void printEnt(Entry* ent){	
+    printf("details of entry at %p\n", (void*) ent);
 	printf("it's key is: %s\n", ent->key);
 	printf("it's value is: %s\n", ent->value);
 }
@@ -15,6 +15,7 @@ int unitTests(){
     for (int i = 0; i < 2000; i++){
         HashMap* map = createMap(6, &strHash, &strcmpWrap, &defaultFree);
         //debugPrintMap(map, &printEnt, 2);
+				printf("aa\n");
         char* str1 =(char*) malloc(2);
         str1[0] = 'a';
         str1[1] = '\0';
@@ -29,6 +30,7 @@ int unitTests(){
         str4[1] = '\0';
         addPair(map, str1, str2);
         addPair(map, str3, str4);
+				printf("bb\n");
         char* str5 =(char*) malloc(2);
         str5[0] = 'a';
         str5[1] = '\0';
