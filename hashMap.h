@@ -7,6 +7,7 @@ typedef struct {
     void* key;
     void* value;
 } Entry;
+extern int mapErr;
 typedef struct {
     Entry* entries;
     unsigned int (*hashf)(void*);
