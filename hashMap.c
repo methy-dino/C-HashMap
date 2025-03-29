@@ -42,7 +42,7 @@ HashMap* createMap(int length, unsigned int (*hash)(void*), int(*compare)(void*,
     ret->occupied = 0;
     return ret;
 }
-/* it is a good idea to rehash a map after altering many entries, since that will most likely alter the hashcode of the object*/
+/* it is a good idea to rehash a map after deleting an entry, since that will most likely alter the hashcode of the object*/
 int rehash(HashMap* map){
 	// cannot do in-place, since it will probably collide with things that may move after
     unsigned int j = 0;
@@ -106,11 +106,15 @@ int growMap(HashMap* map, unsigned int inc){
 int addPair(HashMap* map, void* key, void* val){
     // if (map->occupied > 3 / 4 * map->length)
     if (4 * map->occupied > 3 * map->length-1){
-        //printf("growing map\n");
-        if (growMap(map, map->length)){
-					mapErr = MALLOC_FAIL;
-					return 1;
-				}
+			char rep = 0;
+      while (growMap(map, map->length) && rep < 3){
+				rep++;
+			}
+			if (rep == 3){
+				return 1;
+			} else {
+				mapErr = 0;
+			}
     }
     int index = map->hashf(key) % map->length;
     while (map->entries[index].key != NULL){
