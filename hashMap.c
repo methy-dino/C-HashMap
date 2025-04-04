@@ -172,7 +172,7 @@ void* getValue(HashMap* map, void* key){
     int index = map->hashf(key) % map->length;
     int start = index;
     while (map->compare(map->entries[index].key, key) != 0){
-        index++;
+				index++;
         if (index == map->length){
             index = 0;
         }
@@ -201,7 +201,7 @@ void discardMap(HashMap* map){
 }
 // very shitty default hash function that should return on anything.
 unsigned int defHash(void* key){
-	return (int) ((char*)key)[0];
+	return *((char*)key)[0];
 }
 
 // function to hash null terminated strings.
