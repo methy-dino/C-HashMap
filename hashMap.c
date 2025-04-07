@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <limits.h>
 int mapErr = 0;
 #define MAP_NOSUCH 1
@@ -201,7 +202,7 @@ void discardMap(HashMap* map){
 }
 // very shitty default hash function that should return on anything.
 unsigned int defHash(void* key){
-	return *((char*)key)[0];
+	return ((char*)key)[0];
 }
 
 // function to hash null terminated strings.
@@ -216,6 +217,12 @@ unsigned int strHash(void* key){
 		i++;
 	}
 	return value;
+}
+int strcmpWrap(void* strA, void* strB){
+	if (strB == NULL){
+		return 1;
+	}
+	return strcmp(strA, strB);
 }
 void defaultFree(Entry* entry){
 	free(entry->key);

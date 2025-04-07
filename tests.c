@@ -8,9 +8,9 @@ void printEnt(Entry* ent){
 	printf("it's key is: %s\n", ent->key);
 	printf("it's value is: %s\n", ent->value);
 }
-int strcmpWrap(void* a, void* b){
-    return strcmp((char*)a,(char*)b);
-}
+//int strcmpWrap(void* a, void* b){
+  //  return strcmp((char*)a,(char*)b);
+//}
 int unitTests(){
     for (int i = 0; i < 2000; i++){
         HashMap* map = createMap(6, &strHash, &strcmpWrap, &defaultFree);
