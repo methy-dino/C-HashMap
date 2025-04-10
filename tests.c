@@ -8,14 +8,10 @@ void printEnt(Entry* ent){
 	printf("it's key is: %s\n", ent->key);
 	printf("it's value is: %s\n", ent->value);
 }
-//int strcmpWrap(void* a, void* b){
-  //  return strcmp((char*)a,(char*)b);
-//}
 int unitTests(){
-    for (int i = 0; i < 2000; i++){
+	int i = 0;
+    for (i = 0; i < 2000; i++){
         HashMap* map = createMap(6, &strHash, &strcmpWrap, &defaultFree);
-        //debugPrintMap(map, &printEnt, 2);
-				printf("aa\n");
         char* str1 =(char*) malloc(2);
         str1[0] = 'a';
         str1[1] = '\0';
