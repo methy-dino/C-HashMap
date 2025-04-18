@@ -145,6 +145,7 @@ int removeKey(HashMap* map, void* key){
 				map->free(map->entries[i].key, map->entries[i].value);
 				map->entries[i].value = NULL;
 				map->entries[i].key = NULL;
+				map->occupied--;
 			} else {
 				return 1;
 			}
@@ -169,6 +170,7 @@ int removeKey(HashMap* map, void* key){
 				}
 				map->free(curr->key, curr->value);
 				free(curr);
+				map->occupied--;
 			} else {
 				return 1;
 			}
@@ -219,6 +221,7 @@ void clearMap(HashMap* map){
 		map->entries[i].key = NULL;
 		map->entries[i].value = NULL;
 	}
+	map->occupied = 0;
 }
 void discardMap(HashMap* map){
   size_t i = 0;
@@ -267,7 +270,7 @@ void debugPrintMap(HashMap* map, void (*printEntry)(Entry*), int verbosity){
 		printf("hashmap debug info:\n");
 	}
 	if (verbosity > 0) {
-		printf("it has %u entries, of which %u are full\n", map->length, map->occupied);
+		printf("it has %u entries, with %u pairs stored in them.\n", map->length, map->occupied);
 	}
 	if (printEntry != NULL) {
 		printf("this is it's entry data:\n");
