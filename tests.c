@@ -11,7 +11,7 @@ void printEnt(Entry* ent){
 int unitTests(){
 	int i = 0;
     for (i = 0; i < 2000; i++){
-        HashMap* map = createMap(6, &strHash, &strcmpWrap, &defaultFree);
+        HashMap* map = createMap(8, &strHash, &strcmpWrap, &defaultFree);
         char* str1 =(char*) malloc(2);
         str1[0] = 'a';
         str1[1] = '\0';
@@ -26,12 +26,15 @@ int unitTests(){
         str4[1] = '\0';
         addPair(map, str1, str2);
         addPair(map, str3, str4);
-				printf("bb\n");
         char* str5 =(char*) malloc(2);
-        str5[0] = 'a';
+        str5[0] = 'e';
         str5[1] = '\0';
+				char* str6 =(char*) malloc(2);
+        str6[0] = 'e';
+        str6[1] = '\0';
+				addPair(map, str5, str6);
         debugPrintMap(map, &printEnt, 2);
-       discardMap(map);
+        discardMap(map);
     }
     printf("memleak pass\n");
 }

@@ -9,6 +9,18 @@ typedef struct {
     void* key;
     void* value;
 } Entry;
+typedef struct node {
+	void* key;
+	void* value;
+	struct node* next;
+} node;
+node* b_node(void* key, void* val){
+	node* ret = malloc(sizeof(node));
+	ret->key = key;
+	ret->value = val;
+	ret->next = NULL;
+	return ret;
+}
 typedef struct {
     Entry* entries;
     size_t (*hashf)(void*);
@@ -119,36 +131,32 @@ int addPair(HashMap* map, void* key, void* val){
 			}
     }
     size_t index = map->hashf(key) % map->length;
-    while (map->entries[index].key != NULL){
-      	if (map->compare(map->entries[index].key, key) == 0){
-					map->entries[index].key = key;
-    			map->entries[index].value = val;
-					/*this should give better order*/
+    if (map->entries[index].key != NULL){
+			if (map->entries[index].value){
+				if (map->compare(key, map->entries[index].key) == 0){
+					map->entries[index].value = val;
+				} else {
+					map->entries[index].key = b_node(map->entries[index].key, map->entries[index].value);
+					map->entries[index].value = NULL;
+					((node*)map->entries[index].key)->next = b_node(key, val);
 				}
-				index++;
-        if (index == map->length){
-            index = 0;
-        }	
-    }
-			/*printf("added key at index %d\n", index);*/
-    map->entries[index].key = key;
-    map->entries[index].value = val;
+			} else {
+				node* curr = map->entries[index].key;
+				while (curr && map->compare(key, curr->key) != 0){
+					curr = curr->next;
+				}
+				if (curr){
+					curr->value = val;
+				} else {
+					curr->next = b_node(key, val);
+				}
+			}
+		} else {
+			map->entries[index].key = key;
+			map->entries[index].value = val;
+		}
     map->occupied++;
 		return 0;
-}
-size_t hasKey(HashMap* map, void* key){
-    size_t index = map->hashf(key) % map->length;
-    size_t start = index;
-    while (map->compare(map->entries[index].key, key) != 0){
-        index++;
-        if (index == map->length){
-            index = 0;
-        }
-        if (index == start){
-            return -1; /*converts to max*/
-				}
-    }
-    return index;
 }
 int removeKey(HashMap* map, void* key){
     size_t index = map->hashf(key) % map->length;
@@ -170,18 +178,24 @@ int removeKey(HashMap* map, void* key){
 }
 void* getValue(HashMap* map, void* key){
   size_t index = map->hashf(key) % map->length;
-  size_t start = index;
-  while (map->compare(map->entries[index].key, key) != 0){
-		index++;
-		if (index == map->length){
-			index = 0;
+	if (map->entries[index].key == NULL){
+		return NULL;
+	}
+	if (map->entries[index].value == NULL){
+		node* curr = map->entries[index].key;
+		while (curr && map->compare(key, curr->key) != 0){
+			curr = curr->next;
 		}
-		if (index == start){
-			mapErr = MAP_NOSUCH;
-			return (void*)NULL;
-      }
-  }
+		if (curr){
+			return curr->value;
+		} else {
+			return NULL;
+		}
+	}
   return map->entries[index].value;
+}
+size_t hasKey(HashMap* map, void* key){
+	return getValue(map, key) != NULL;
 }
 void clearMap(HashMap* map){
   size_t i = 0;  
@@ -247,10 +261,22 @@ void debugPrintMap(HashMap* map, void (*printEntry)(Entry*), int verbosity){
 	if (printEntry != NULL) {
 		printf("this is it's entry data:\n");
 		size_t i;
+		size_t decimal;
 		for (i = 0; i < map->length; i++){
-			printf("- - - - Entry %d - - - -\n", i);
 			if (map->entries[i].key != NULL){
-				printEntry(&map->entries[i]);
+				if (map->entries[i].value == NULL){
+					node* curr = map->entries[i].key;
+					decimal = 1;
+					while (curr){
+						printf("- - - - Entry %u.%u - - - -\n", i, decimal);
+						printEntry((Entry*)curr);
+						curr = curr->next;
+						decimal++;
+					}
+				} else {
+					printf("- - - - Entry %u.0 - - - -\n", i);
+					printEntry(&map->entries[i]);
+				}
 			} else {
         printf("NULL ENTRY\n");        
       }
