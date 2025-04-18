@@ -34,7 +34,8 @@ int unitTests(){
         str6[1] = '\0';
 				addPair(map, str5, str6);
         debugPrintMap(map, &printEnt, 2);
-				printf("%p %s teste", getValue(map, str3), getValue(map, str3));
+				removeKey(map, str5);
+				printf("%p %s teste\n", getValue(map, str3), getValue(map, str3));
         discardMap(map);
     }
     printf("memleak pass\n");

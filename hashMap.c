@@ -138,21 +138,45 @@ int addPair(HashMap* map, void* key, void* val){
 		return 0;
 }
 int removeKey(HashMap* map, void* key){
-    size_t index = map->hashf(key) % map->length;
-    size_t start = index;
-    while (map->compare(map->entries[index].key, key) != 0){
-        index++;
-        if (index == map->length){
-            index = 0;
-        }
-        if (index == start){
-					return 1;
-        }
-    }
-    map->occupied--;
-    map->free(map->entries[index].key, map->entries[index].value);
-    map->entries[index].key = NULL;
-    return 0;
+	size_t i = map->hashf(key) % map->length;
+	if (map->entries[i].key != NULL){
+		if (map->entries[i].value){
+			if (map->compare(key, map->entries[i].key) == 0){
+				map->free(map->entries[i].key, map->entries[i].value);
+				map->entries[i].value = NULL;
+				map->entries[i].key = NULL;
+			} else {
+				return 1;
+			}
+		} else {
+			node* curr = map->entries[i].key;
+			node* prev = NULL;
+			int result = 0;
+			while ((result = map->compare(key, curr->key)) != 0 && curr->next){
+				prev = curr;
+				curr = curr->next;
+			}
+			if (result == 0){
+				if (prev) {
+				prev->next = curr->next;
+				} else {
+					if (curr->next){
+						map->entries[i].key = curr->next;
+					} else {
+						map->entries[i].value = curr->value;
+						map->entries[i].key = curr->key;
+					}
+				}
+				map->free(curr->key, curr->value);
+				free(curr);
+			} else {
+				return 1;
+			}
+		}
+	} else {
+		return 1;
+	}    
+	return 0;
 }
 void* getValue(HashMap* map, void* key){
   size_t index = map->hashf(key) % map->length;
