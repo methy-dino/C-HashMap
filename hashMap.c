@@ -40,7 +40,7 @@ void add_handle(Entry* entry, void* key, void* val, int (*cmp)(void* a, void*b))
 				if (result == 0){
 					curr->value = val;
 				} else {
-					curr->next = b_node(val,key);
+					curr->next = b_node(key, val);
 				}
 			}
 		} else {
