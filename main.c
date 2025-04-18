@@ -30,7 +30,6 @@ int main(int argc, char *argv[]){
     addPair(a,(void*)"a",(void*)"b");
     addPair(a,(void*)"c",(void*)"b");
     addPair(a,(void*)"d",(void*)"eeeee");
-		printf("bb\n");
     printf("%s\n",  (char*)getValue(a,"d"));
     /*test for no collisions*/
     int i = 0;
