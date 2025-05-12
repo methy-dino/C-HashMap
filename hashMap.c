@@ -17,20 +17,33 @@ typedef struct node {
 node* b_node(void* key, void* val){
 	node* ret;
 	ret = malloc(sizeof(node));
+	if (ret  == NULL){
+		return ret;
+	}
 	ret->key = key;
 	ret->value = val;
 	ret->next = NULL;
 	return ret;
 }
-void add_handle(Entry* entry, void* key, void* val, int (*cmp)(void* a, void*b)){
-		if (entry->key != NULL){
+int add_handle(Entry* entry, void* key, void* val, int (*cmp)(void* a, void*b)){
+	node* nd;	
+	if (entry->key != NULL){
 			if (entry->value){
 				if (cmp(key, entry->key) == 0){
 					entry->value = val;
 				} else {
-					entry->key = b_node(entry->key, entry->value);
+					nd = b_node(entry->key, entry->value);
+					if (nd == NULL){
+						return 1;
+					}
 					entry->value = NULL;
-					((node*)entry->key)->next = b_node(key, val);
+					entry->key = nd;
+					nd = b_node(key, val);
+					if (nd == NULL){
+						return 1;
+					}
+					((node*)entry->key)->next = nd;
+					return ((node*)entry->key)->next == NULL;
 				}
 			} else {
 				node* curr;
@@ -43,12 +56,14 @@ void add_handle(Entry* entry, void* key, void* val, int (*cmp)(void* a, void*b))
 					curr->value = val;
 				} else {
 					curr->next = b_node(key, val);
+					return curr->next == NULL;
 				}
 			}
 		} else {
 			entry->key = key;
 			entry->value = val;
 		}
+	return 0;
 }
 typedef struct {
     Entry* entries;
@@ -141,9 +156,9 @@ int addPair(HashMap* map, void* key, void* val){
 			}
     }
 		index = map->hashf(key) % map->length;
-		add_handle(&map->entries[index], key, val, map->compare); 
+		index = add_handle(&map->entries[index], key, val, map->compare); 
     map->occupied++;
-		return 0;
+		return index;
 }
 int removeKey(HashMap* map, void* key){
 	size_t i;
