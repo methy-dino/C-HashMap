@@ -14,32 +14,33 @@ typedef struct node {
 	void* value;
 	struct node* next;
 } node;
-node* b_node(void* key, void* val){
+node* b_node(const void* key, const void* val){
 	node* ret;
-	ret = malloc(sizeof(node));
-	if (ret  == NULL){
+	if ((ret = malloc(sizeof(node))) == NULL){
 		return ret;
 	}
-	ret->key = key;
-	ret->value = val;
+	ret->key = (void*)key;
+	ret->value = (void*)val;
 	ret->next = NULL;
 	return ret;
 }
-int add_handle(Entry* entry, void* key, void* val, int (*cmp)(void* a, void*b)){
+int add_handle(Entry* entry, const void* key, const void* val, int (*cmp)(const void* a, const void*b)){
 	node* nd;	
 	if (entry->key != NULL){
 			if (entry->value){
 				if (cmp(key, entry->key) == 0){
-					entry->value = val;
+					entry->value = (void*)val;
 				} else {
 					nd = b_node(entry->key, entry->value);
 					if (nd == NULL){
+						mapErr = MALLOC_FAIL;
 						return 1;
 					}
-					entry->value = NULL;
+					entry->value = NULL;		
 					entry->key = nd;
 					nd = b_node(key, val);
 					if (nd == NULL){
+						mapErr = MALLOC_FAIL;
 						return 1;
 					}
 					((node*)entry->key)->next = nd;
@@ -53,29 +54,29 @@ int add_handle(Entry* entry, void* key, void* val, int (*cmp)(void* a, void*b)){
 					curr = curr->next;
 				}
 				if (result == 0){
-					curr->value = val;
+					curr->value = (void*)val;
 				} else {
 					curr->next = b_node(key, val);
 					return curr->next == NULL;
 				}
 			}
 		} else {
-			entry->key = key;
-			entry->value = val;
+			entry->key = (void*)key;
+			entry->value = (void*)val;
 		}
 	return 0;
 }
 typedef struct {
     Entry* entries;
-    size_t (*hashf)(void*);
+    size_t (*hashf)(const void*);
     /* used for comparison between keys, if they are equal, it should return 0, if different, it should be != 0*/
-    int (*compare)(void*, void*);
+    int (*compare)(const void*, const void*);
     /* used to free data storage.*/    
     void (*free)(void* key, void* val);
     size_t length;
     size_t occupied;
 } HashMap;
-HashMap* createMap(size_t length, size_t (*hash)(void*), int(*compare)(void*,void*),void (*freefn)(void*, void*)){
+HashMap* createMap(const size_t length, size_t (*hash)(const void*), int(*compare)(const void*, const void*),void (*freefn)(void*, void*)){
     HashMap* ret;
     Entry* entries;
     size_t i;
@@ -102,7 +103,7 @@ HashMap* createMap(size_t length, size_t (*hash)(void*), int(*compare)(void*,voi
     ret->occupied = 0;
     return ret;
 }
-int growMap(HashMap* map, size_t inc){
+int growMap(HashMap* map, const size_t inc){
     size_t i;
 		size_t j;
     size_t newL;
@@ -140,10 +141,9 @@ int growMap(HashMap* map, size_t inc){
     map->length = newL;
 		return 0;
 }
-int addPair(HashMap* map, void* key, void* val){
+int addPair(HashMap* map, const void* key, const void* val){
     size_t index; 
-    /*if (map->occupied > 3 / 4 * map->length)*/
-    if (4 * map->occupied > 3 * map->length-1){
+    if (map->occupied >= (3 * map->length) / 4){
 			unsigned char rep;
 			rep = 0;
       while (growMap(map, map->length) && rep < 3){
@@ -160,7 +160,7 @@ int addPair(HashMap* map, void* key, void* val){
     map->occupied++;
 		return index;
 }
-int removeKey(HashMap* map, void* key){
+int removeKey(HashMap* map, const void* key){
 	size_t i;
 	i = map->hashf(key) % map->length;
 	if (map->entries[i].key != NULL){
@@ -206,7 +206,7 @@ int removeKey(HashMap* map, void* key){
 	}    
 	return 0;
 }
-void* getValue(HashMap* map, void* key){
+void* getValue(const HashMap* map, const void* key){
   size_t index;
 	index = map->hashf(key) % map->length;
 	if (map->entries[index].key == NULL){
@@ -225,7 +225,7 @@ void* getValue(HashMap* map, void* key){
 	}
   return map->entries[index].value;
 }
-size_t hasKey(HashMap* map, void* key){
+size_t hasKey(const HashMap* map, const void* key){
 	return getValue(map, key) != NULL;
 }
 void clearMap(HashMap* map){
@@ -256,12 +256,12 @@ void discardMap(HashMap* map){
 	free(map);
 }
 /* very shitty default hash function that should return on anything.*/
-size_t defHash(void* key){
+size_t defHash(const void* key){
 	return ((char*)key)[0];
 }
 
 /* function to hash null terminated strings.*/
-size_t strHash(void* key){
+size_t strHash(const void* key){
 	size_t value;
 	size_t charSize;
   size_t i;
@@ -274,7 +274,7 @@ size_t strHash(void* key){
 	}
 	return value;
 }
-int strcmpWrap(void* strA, void* strB){
+int strcmpWrap(const void* strA, const void* strB){
 	if (strB == NULL || strA == NULL){
 		return 1;
 	}
@@ -288,8 +288,8 @@ void defaultFree(void* key, void* value){
  * 0 entry print for all entries
  * 1 prints hashmap entry fill rate.
  * 2 also prints hashmap address and entry adress
- * */
-void debugPrintMap(HashMap* map, void (*printEntry)(Entry*), int verbosity){
+*/
+void debugPrintMap(const HashMap* map, void (*printEntry)(const Entry*), int verbosity){
 	printf("-  -  -  -\n");
 	if (verbosity > 1){
 		printf("hashmap debug info for map at: %p, which has it's entries at:%p\n", (void*)map, (void*)&map->entries);
@@ -325,6 +325,6 @@ void debugPrintMap(HashMap* map, void (*printEntry)(Entry*), int verbosity){
 	}
 }
 /* there's not much I can do about printing, since there can be near infinite pairs, uh have this generic function.*/
-void addressPrint(Entry* pair){
+void addressPrint(const Entry* pair){
 	printf("key at %p and val at %p", pair->key, pair->value);
 }
