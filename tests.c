@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-void printEnt(Entry* ent){	
+void printEnt(const Entry* ent){	
     printf("details of entry at %p\n", (void*) ent);
 	printf("it's key is: %s\n", (char*) ent->key);
 	printf("it's value is: %s\n", (char*) ent->value);

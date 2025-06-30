@@ -4,7 +4,7 @@
 #include "hashMap.h"
 #include "tests.h"
 /* file with an example of how to use the library.*/
-size_t strHash2(void* key){
+size_t strHash2(const void* key){
     unsigned int code;
     unsigned int i;
 		code = 0;
@@ -15,15 +15,15 @@ size_t strHash2(void* key){
     }
     return code;
 }
-int isSame(void* a, void* b){
+int isSame(const void* a, const void* b){
     return strcmp((char*)a, (char*)b);
 }
 
-void freeStr(Entry* entry){
+void freeStr(void* key, void* value){
 	/*use a function like this to clear your custom inserted data structure
 	since it can contain other pointers inside it.*/
-	free(entry->key);
-	free(entry->value);
+	free(key);
+	free(value);
 }
 int main(){
     HashMap* a;
