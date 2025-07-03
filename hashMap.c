@@ -128,34 +128,54 @@ int addPair(HashMap* map, const void* key, const void* val){
 	index = map->hashf(key) % map->length;
 //	printf("%u, %s key %s val\n", index, key, val);
 	ent = &map->entries[index];
-	if (ent->next){
-		while (ent->next){
+	if (ent->next || ent->key){
+		while (ent->next && map->compare(ent->key, key)){
 			ent = ent->next;
 		}
-		BUILD_ENTRY(key, val, ent->next);
+		if (map->compare(ent->key, key)){
+			BUILD_ENTRY(key, val, ent->next);
+		} else {
+			ent->value = (void*) val;
+			return -1;
+		}
 	} else {
 		ent->key = (void*)key;
 		ent->value = (void*)val;
 	}
-	map->occupied++;
 	return 0;
 }
 int removeKey(HashMap* map, const void* key){
 	size_t i;
-	Entry* ent;
+	Entry* ent, *prev;
 	i = map->hashf(key) % map->length;
 	ent = &map->entries[i];
 	if (map->compare(ent->key, key)){ 
 		do {
+			prev = ent;
 			ent = ent->next;
 		} while(ent && map->compare(ent->key, key));
 		if (ent){
+			map->occupied--;
+			if (map->free){
+				map->free(ent->key, ent->value);
+			} else {
+				free(ent->key);
+				free(ent->value);
+			}
+			prev->next = ent->next; 
 			free(ent);
 		} else {
 			mapErr = MAP_NOSUCH;
 			return 1;
 		}
 	} else {
+		if (map->free){
+			map->free(ent->key, ent->value);
+		} else {
+			free(ent->key);
+			free(ent->value);
+		}
+		map->occupied--;
 		ent->key = NULL;
 	}
 	return 0;
@@ -185,17 +205,19 @@ void clearMap(HashMap* map){
 	Entry* ent, *tmp;
 	for (i = 0; i < map->length; i++){
 		ent = &map->entries[i];
-			if (map->free){
+			if (map->free && ent->key != NULL) {
 				map->free(ent->key, ent->value);
-			} else {
-				map->free(ent->key, ent->value);
+			} else if (ent->key != NULL) {
+				free(ent->key);
+				free(ent->value);
 			}
 			ent = ent->next;
 			while (ent){
 				if (map->free){
 					map->free(ent->key, ent->value);
 				} else {
-					map->free(ent->key, ent->value);
+					free(ent->key);
+					free(ent->value);
 				}
 				tmp = ent;
 				ent = ent->next;
@@ -253,7 +275,7 @@ void debugPrintMap(const HashMap* map, void (*printEntry)(const Entry*), int ver
 		printf("hashmap debug info:\n");
 	}
 	if (verbosity > 0) {
-		printf("it has %lu entries, with %lu pairs stored in them.\n", (unsigned long) map->length, (unsigned long)map->occupied);
+		printf("it has %lu entries, with %lu pairs stored in them.\n", (unsigned long) map->length, (unsigned long) map->occupied);
 	}
 	if (printEntry != NULL) {
 		size_t i;
@@ -265,7 +287,7 @@ void debugPrintMap(const HashMap* map, void (*printEntry)(const Entry*), int ver
 					decimal = 0;
 					while (curr != NULL){
 						printf("- - - - Entry %lu.%lu - - - -\n", (unsigned long)i, (unsigned long)decimal);
-						printEntry((Entry*)curr);
+						printEntry(curr);
 						curr = curr->next;
 						decimal++;
 					}

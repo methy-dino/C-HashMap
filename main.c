@@ -26,43 +26,42 @@ void freeStr(void* key, void* value){
 	free(value);
 }
 int main(){
-    HashMap* a;
-    int i;
-    char* str1;
-    char* str2;
-    char* str3;
-    char* str4;
-    char* str5;
-    char ss[2] = {'a','\0'};
-		a = createMap(2, &strHash, &isSame, &freeStr);
-    /* THIS IS A WRONG WAY TO ADD PAIRS, SINCE YOU SHOULD ALLOC THEN ON THE HEAP*/
-    addPair(a,(void*)"a",(void*)"b");
-    addPair(a,(void*)"c",(void*)"b");
-    addPair(a,(void*)"d",(void*)"eeeee");
-    printf("%s\n", (char*)getValue(a,"d"));
-    /*test for no collisions*/
-		for (i = 0; i <  200; i++){
-        HashMap* map = createMap(6, &strHash2, &isSame, &freeStr);
-
-        str1 =(char*) malloc(2);
-        str1[0] = 'a';
-        str1[1] = '\0';
-        str2 =(char*) malloc(2);
-        str2[0] = '1';
-        str2[1] = '\0';
-        str3 =(char*) malloc(2);
-        str3[0] = 'b';
-        str2[1] = '\0';
-        str4 =(char*) malloc(2);
-        str4[0] = '2';
-        str4[1] = '\0';
-        addPair(map, str1, str2);
-        addPair(map, str3, str4);
-        str5 =(char*) malloc(2);
-        str5[0] = 'a';
-        str5[1] = '\0';
-        printf("%s\n",  (char*)getValue(map, ss));
-    }
-    unitTests();
-    return 0;
+	HashMap* a;
+	int i;
+	char* str1;
+	char* str2;
+	char* str3;
+	char* str4;
+	char* str5;
+	char ss[2] = {'a','\0'};
+	/*a = createMap(2, &strHash, &isSame, &freeStr);
+		 THIS IS A WRONG WAY TO ADD PAIRS, SINCE YOU SHOULD ALLOC THEN ON THE HEAP
+	addPair(a,(void*)"a",(void*)"b");
+	addPair(a,(void*)"c",(void*)"b");
+	addPair(a,(void*)"d",(void*)"eeeee");
+	printf("%s\n", (char*)getValue(a,"d"));*/
+	/*test for no collisions*/
+	HashMap* map = createMap(6, &strHash2, &isSame, &freeStr);
+	str1 =(char*) malloc(2);
+	str1[0] = 'a';
+	str1[1] = '\0';
+	str2 =(char*) malloc(2);
+	str2[0] = '1';
+	str2[1] = '\0';
+	str3 =(char*) malloc(2);
+	str3[0] = 'b';
+	str3[1] = '\0';
+	str4 =(char*) malloc(2);
+	str4[0] = '2';
+	str4[1] = '\0';
+	addPair(map, str1, str2);
+	addPair(map, str3, str4);
+	str5 =(char*) malloc(2);
+	str5[0] = 'a';
+	str5[1] = '\0';
+	printf("%s\n",  (char*)getValue(map, ss));
+	free(str5);
+	discardMap(map);
+	unitTests();
+	return 0;
 }
