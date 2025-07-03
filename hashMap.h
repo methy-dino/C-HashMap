@@ -7,17 +7,17 @@
 extern int mapErr;
 #define MAP_NOSUCH 1
 #define MALLOC_FAIL 2
+#define BUILD_ENTRY(key, val, ret) { \
+	if ((ret = malloc(sizeof(Entry))) != NULL){ \
+	ret->key = (void*)key; \
+	ret->value = (void*)val; \
+	ret->next = NULL; \
+	} \
+}
 typedef struct {
     void* key;
     void* value;
 } Entry;
-typedef struct node {
-	void* key;
-	void* value;
-	struct node* next;
-} node;
-node* b_node(const void* key, const void* val);
-int add_handle(Entry* entry, const void* key, const void* val, int (*cmp)(const void* a, const void*b));
 typedef struct {
     Entry* entries;
     size_t (*hashf)(const void*);

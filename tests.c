@@ -45,5 +45,6 @@ int unitTests(){
         discardMap(map);
     }
     printf("memleak pass\n");
+		while (1){}
 		return 1;
 }

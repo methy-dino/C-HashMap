@@ -35,12 +35,11 @@ int main(){
     char* str5;
     char ss[2] = {'a','\0'};
 		a = createMap(2, &strHash, &isSame, &freeStr);
-		printf("aa\n");
     /* THIS IS A WRONG WAY TO ADD PAIRS, SINCE YOU SHOULD ALLOC THEN ON THE HEAP*/
     addPair(a,(void*)"a",(void*)"b");
     addPair(a,(void*)"c",(void*)"b");
     addPair(a,(void*)"d",(void*)"eeeee");
-    printf("%s\n",  (char*)getValue(a,"d"));
+    printf("%s\n", (char*)getValue(a,"d"));
     /*test for no collisions*/
 		for (i = 0; i <  200; i++){
         HashMap* map = createMap(6, &strHash2, &isSame, &freeStr);
@@ -62,7 +61,7 @@ int main(){
         str5 =(char*) malloc(2);
         str5[0] = 'a';
         str5[1] = '\0';
-        printf("%s",  (char*)getValue(map, ss));
+        printf("%s\n",  (char*)getValue(map, ss));
     }
     unitTests();
     return 0;
