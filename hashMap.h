@@ -14,9 +14,10 @@ extern int mapErr;
 	ret->next = NULL; \
 	} \
 }
-typedef struct {
-    void* key;
-    void* value;
+typedef struct entry {
+	void* key;
+	void* value;
+	struct entry* next;
 } Entry;
 typedef struct {
     Entry* entries;
