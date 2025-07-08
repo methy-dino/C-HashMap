@@ -134,6 +134,7 @@ int addPair(HashMap* map, const void* key, const void* val){
 		}
 		if (map->compare(ent->key, key)){
 			BUILD_ENTRY(key, val, ent->next);
+			map->occupied++;
 		} else {
 			ent->value = (void*) val;
 			return -1;
@@ -141,6 +142,7 @@ int addPair(HashMap* map, const void* key, const void* val){
 	} else {
 		ent->key = (void*)key;
 		ent->value = (void*)val;
+		map->occupied++;
 	}
 	return 0;
 }
@@ -186,7 +188,7 @@ void* getValue(const HashMap* map, const void* key){
 	index = map->hashf(key) % map->length;
 	//printf("%u\n", index);
 	curr = &map->entries[index];
-	while (curr != NULL && map->compare(key, curr->key) != 0){
+	while (curr != NULL && curr->key != NULL && map->compare(key, curr->key) != 0){
 		curr = curr->next;
 	}
 	if (curr && curr->key){
