@@ -242,15 +242,10 @@ size_t defHash(const void* key){
 /* function to hash null terminated strings.*/
 size_t strHash(const void* key){
 	size_t value;
-	size_t charSize;
-  size_t i;
-	i = 0;
-	charSize = sizeof(char) * 8;
 	value = 0;
-	while (((char*)key)[i] != '\0'){
-		/* the bit shift by charSize is to grant compatibility with other charset, such as UTF-16.*/ 
-		value = ((value << charSize) | ((char*)key)[i]) & 65033;
-		i++;
+	while ((*(char*)key) != '\0'){
+		value = ((value << 2) | (*(char*)key)) & 0x1A;
+		key++;
 	}
 	return value;
 }

@@ -26,8 +26,6 @@ void freeStr(void* key, void* value){
 	free(value);
 }
 int main(){
-	HashMap* a;
-	int i;
 	char* str1;
 	char* str2;
 	char* str3;
